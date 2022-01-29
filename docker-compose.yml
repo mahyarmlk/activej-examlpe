@@ -1,0 +1,22 @@
+version: "3"
+services:
+  example-db:
+    container_name: example-db
+    image: postgres:13-alpine
+    hostname: example-postgresql
+    volumes:
+      - ./volume_data/db:/var/lib/postgresql/data
+      - ./docker-entrypoint-initdb.d:/docker-entrypoint-initdb.d
+    restart: always
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=example
+      - POSTGRES_PASSWORD=example
+      - POSTGRES_DB=example
+  example-redis:
+    container_name: example-redis
+    image: redis
+    hostname: example-redis
+    ports:
+      - "6379:6379"
