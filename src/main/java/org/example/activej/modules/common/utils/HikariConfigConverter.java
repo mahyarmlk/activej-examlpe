@@ -38,15 +38,10 @@ public final class HikariConfigConverter extends ComplexConfigConverter<HikariCo
         return this;
     }
 
-    private String getConnectionInitSql() {
-        return notSafeSql ? "SET sql_safe_updates=0;" : "SET sql_safe_updates=1;";
-    }
-
     @Override
     protected HikariConfig provide(Config config, HikariConfig defaultValue) {
         defaultValue.setRegisterMbeans(true);
         defaultValue.setPoolName(poolName);
-//        defaultValue.setConnectionInitSql(getConnectionInitSql());
 
         HikariConfig hikariConfig = new HikariConfig();
         if (allowMultiQueries) {

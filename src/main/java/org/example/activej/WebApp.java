@@ -13,6 +13,7 @@ import io.activej.launcher.Launcher;
 import io.activej.launchers.http.MultithreadedHttpServerLauncher;
 import io.activej.service.ServiceGraphModule;
 import io.activej.service.adapter.ServiceAdapters;
+import io.activej.worker.annotation.Worker;
 import org.example.activej.modules.common.CommonModule;
 import org.example.activej.modules.vehicles.VehicleModule;
 
@@ -27,7 +28,7 @@ public class WebApp extends MultithreadedHttpServerLauncher {
                 CommonModule.create(),
                 VehicleModule.create(),
                 ModuleBuilder.create()
-                        .bind(AsyncServlet.class).to(RoutingServlet.class)
+                        .bind(AsyncServlet.class).to(RoutingServlet.class).in(Worker.class)
                         .multibind(Key.of(RoutingServlet.class), SERVLET_MULTIBINDER)
                         .build()
         );

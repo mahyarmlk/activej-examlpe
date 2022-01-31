@@ -1,37 +1,53 @@
 package org.example.activej.modules.common.redis;
 
+import io.activej.async.service.EventloopService;
+import io.activej.eventloop.Eventloop;
 import io.activej.promise.Promise;
 import io.activej.redis.RedisClient;
+import io.activej.redis.RedisConnection;
 import io.activej.redis.RedisRequest;
 import io.activej.redis.RedisResponse;
+import org.jetbrains.annotations.NotNull;
 
-public class RedisImpl implements Redis {
+public class RedisImpl implements Redis, EventloopService {
 
     private final RedisClient redisClient;
 
-    public RedisImpl(RedisClient redisClient) {
+    private final Eventloop eventloop;
+
+    private RedisConnection redisConnection;
+
+    public RedisImpl(Eventloop eventloop, RedisClient redisClient) {
+        this.eventloop = eventloop;
         this.redisClient = redisClient;
     }
 
     @Override
     public Promise<String> getString(String key) {
-        return redisClient.connect()
-                .then(connection -> connection.cmd(RedisRequest.of("GET", key), RedisResponse.BYTES_UTF8)
-                        .then((result, e) -> connection.quit()
-                                .then(() -> e == null ?
-                                        Promise.of(result) :
-                                        Promise.ofException(e))));
+        return this.redisConnection.cmd(RedisRequest.of("GET", key), RedisResponse.BYTES_UTF8);
     }
 
-    public Promise<Void> putSting(String key, String value) {
-        return putSting(key, value, null);
+    public Promise<Void> putString(String key, String value) {
+        return putString(key, value, null);
     }
 
-    public Promise<Void> putSting(String key, String value, Integer ttl) {
+    public Promise<Void> putString(String key, String value, Integer ttl) {
         RedisRequest request = ttl == null ? RedisRequest.of("SET", key, value) : RedisRequest.of("SET", key, value, "EX", String.valueOf(ttl));
 
-        return redisClient.connect()
-                .then(connection -> connection.cmd(request, RedisResponse.OK)
-                        .then((result, e) -> connection.quit()));
+        return this.redisConnection.cmd(request, RedisResponse.OK);
+    }
+
+    @Override
+    public @NotNull Eventloop getEventloop() {
+        return eventloop;
+    }
+
+    public @NotNull Promise<RedisConnection> start() {
+        return redisClient.connect().whenResult(redisConnection -> this.redisConnection = redisConnection);
+    }
+
+    @Override
+    public @NotNull Promise<?> stop() {
+        return redisConnection.quit();
     }
 }

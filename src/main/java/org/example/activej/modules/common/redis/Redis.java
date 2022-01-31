@@ -6,8 +6,8 @@ public interface Redis {
 
     Promise<String> getString(String key);
 
-    Promise<Void> putSting(String key, String value);
+    Promise<Void> putString(String key, String value);
 
-    Promise<Void> putSting(String key, String value, Integer ttl);
+    Promise<Void> putString(String key, String value, Integer ttl);
 
 }
